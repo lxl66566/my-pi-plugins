@@ -1,0 +1,59 @@
+{
+  "name": "pi-replace-function",
+  "version": "0.1.1",
+  "description": "pi coding agent extension: replace a whole function by name",
+  "keywords": [
+    "ast-grep",
+    "code-editing",
+    "pi",
+    "pi-coding-agent",
+    "pi-extension",
+    "pi-package",
+    "tree-sitter"
+  ],
+  "homepage": "https://github.com/lxl66566/my-pi-plugins/tree/main/packages/pi-replace-function#readme",
+  "bugs": {
+    "url": "https://github.com/lxl66566/my-pi-plugins/issues"
+  },
+  "license": "MIT",
+  "author": "lxl66566",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lxl66566/my-pi-plugins.git",
+    "directory": "packages/pi-replace-function"
+  },
+  "files": [
+    "src",
+    "!src/**/*.test.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "dependencies": {
+    "@ast-grep/napi": "^0.51.0",
+    "@tree-sitter-grammars/tree-sitter-kotlin": "^1.1.0",
+    "@tree-sitter-grammars/tree-sitter-lua": "^0.4.1",
+    "tree-sitter-bash": "^0.25.1",
+    "tree-sitter-c": "^0.24.1",
+    "tree-sitter-c-sharp": "^0.23.5",
+    "tree-sitter-cpp": "^0.23.4",
+    "tree-sitter-go": "^0.25.0",
+    "tree-sitter-haskell": "^0.23.1",
+    "tree-sitter-java": "^0.23.5",
+    "tree-sitter-php": "^0.24.2",
+    "tree-sitter-python": "^0.25.0",
+    "tree-sitter-ruby": "^0.23.1",
+    "tree-sitter-rust": "^0.24.0",
+    "tree-sitter-scala": "^0.24.0",
+    "tree-sitter-swift": "^0.7.1"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "typebox": "*"
+  },
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  }
+}

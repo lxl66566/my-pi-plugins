@@ -1,0 +1,39 @@
+{
+  "name": "pi-reuse-model",
+  "version": "0.1.1",
+  "description": "pi coding agent extension: start every fresh session on the model and thinking level last used in this workspace",
+  "keywords": [
+    "model-selection",
+    "pi",
+    "pi-coding-agent",
+    "pi-extension",
+    "pi-package",
+    "thinking-level"
+  ],
+  "homepage": "https://github.com/lxl66566/my-pi-plugins/tree/main/packages/pi-reuse-model#readme",
+  "bugs": {
+    "url": "https://github.com/lxl66566/my-pi-plugins/issues"
+  },
+  "license": "MIT",
+  "author": "lxl66566",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lxl66566/my-pi-plugins.git",
+    "directory": "packages/pi-reuse-model"
+  },
+  "files": [
+    "src",
+    "!src/**/*.test.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  }
+}
