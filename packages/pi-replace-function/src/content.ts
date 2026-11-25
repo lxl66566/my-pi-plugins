@@ -19,7 +19,8 @@ export interface ExtractedDeclaration {
   readonly name: null | string;
   /** declared parameter count */
   readonly params: number;
-  /** the declaration itself, exactly as parsed (LF), no surrounding trivia */
+  /** the declaration itself, exactly as parsed (LF), including its own
+   * first-line indentation; no surrounding trivia */
   readonly text: string;
 }
 
@@ -81,7 +82,15 @@ export function extractDeclaration(
   const node = nodes[0];
   if (!node) return { error: NO_TARGET_ERROR, ok: false };
   const range = node.range();
-  const prefix = text.slice(0, Math.max(0, range.start.index - base));
+  // Include the first line's own indentation: the re-indent step shifts
+  // content lines relative to this leading whitespace.
+  let declStart = Math.max(0, range.start.index - base);
+  if (declStart > 0) {
+    const lineStart = text.lastIndexOf('\n', declStart - 1) + 1;
+    if (/^[ \t]*$/.test(text.slice(lineStart, declStart)))
+      declStart = lineStart;
+  }
+  const prefix = text.slice(0, declStart);
   const suffix = text.slice(Math.min(text.length, range.end.index - base));
 
   const scanned = scanTrivia(prefix, spec);
@@ -110,7 +119,7 @@ export function extractDeclaration(
       name: kindSpec ? candidateName(kindSpec, node) : declarationName(node),
       params: kindSpec ? countParams(kindSpec, node) : 0,
       text: text.slice(
-        Math.max(0, range.start.index - base),
+        declStart,
         Math.min(text.length, range.end.index - base),
       ),
     },

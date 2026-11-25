@@ -48,6 +48,11 @@ describe('extractDeclaration', () => {
     expect(ok('declare function foo(): void;').name).toBe('foo');
   });
 
+  it('includes the first line indentation in the extracted text', () => {
+    const decl = ok('    m(a: number) {\n        return a\n    }');
+    expect(decl.text).toBe('    m(a: number) {\n        return a\n    }');
+  });
+
   it('captures comments above the declaration as leadComment', () => {
     const decl = ok('/** new doc */\nfunction foo() {}');
     expect(decl.leadComment).toBe('/** new doc */');

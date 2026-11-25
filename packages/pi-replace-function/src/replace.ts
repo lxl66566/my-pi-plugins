@@ -7,7 +7,7 @@ import { parse } from '@ast-grep/napi';
 
 import { commentLineFor, type LanguageSpec } from './langs.ts';
 import type { FunctionCandidate } from './locate.ts';
-import { dedentLines, spliceSpan, toLines, type LinePos } from './text.ts';
+import { spliceSpan, toLines, type LinePos } from './text.ts';
 
 export interface ReplaceFailure {
   readonly error: string;
@@ -71,10 +71,9 @@ export function replaceFunction(
     if (commentStart !== null) start = { column: 0, line: commentStart };
   }
 
-  const pieces =
-    leadComment !== null ? `${leadComment}\n${declText}` : declText;
   const insertion = buildInsertion(
-    pieces.split('\n'),
+    leadComment !== null ? leadComment.split('\n') : [],
+    declText.split('\n'),
     baseIndent,
     start.column,
   );
@@ -100,23 +99,35 @@ export function replaceFunction(
 }
 
 /**
- * Re-indent the dedented replacement lines for a splice at `startColumn`.
+ * Re-indent the replacement lines for a splice at `startColumn`. `shift` —
+ * the declaration's first-line indent in the content — is stripped from every
+ * line that carries it, preserving the content's relative indentation while
+ * landing the declaration at `baseIndent`. Comment lines are captured without
+ * their own indentation and get `baseIndent` whole (after the same strip,
+ * which keeps multi-line block comments aligned).
  * spliceSpan keeps the text before `startColumn` on the first line, so the
  * first line gets `baseIndent` only when the span starts at column 0 (e.g.
  * an extended comment block); otherwise it is placed after the kept prefix.
  */
 function buildInsertion(
-  lines: readonly string[],
+  commentLines: readonly string[],
+  declLines: readonly string[],
   baseIndent: string,
   startColumn: number,
 ): string {
-  return dedentLines(lines)
-    .map((line, i) => {
-      if (line === '') return '';
-      const first = i === 0 && startColumn > 0 ? '' : baseIndent;
-      return first + line;
-    })
-    .join('\n');
+  const shift = leadingWhitespace(declLines[0] ?? '');
+  const strip = (line: string) =>
+    line.startsWith(shift) ? line.slice(shift.length) : line;
+  const indent = (line: string, first: boolean) =>
+    line === ''
+      ? ''
+      : (first && startColumn > 0 ? '' : baseIndent) + strip(line);
+  return [
+    ...commentLines.map((line, i) => indent(line, i === 0)),
+    ...declLines.map((line, i) =>
+      indent(line, i === 0 && commentLines.length === 0),
+    ),
+  ].join('\n');
 }
 
 /** Count tree-sitter ERROR nodes; tolerant of already-broken files. */

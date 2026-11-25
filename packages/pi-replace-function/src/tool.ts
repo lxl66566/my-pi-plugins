@@ -106,12 +106,7 @@ export async function applyReplaceFunction(
   }
 
   return withFileMutationQueue(absolutePath, async () => {
-    // Check the abort flag between awaits instead of racing the queue with a
-    // listener, so the queue stays locked until the current write settles.
-    const throwIfAborted = () => {
-      if (signal?.aborted) throw new Error('Operation aborted');
-    };
-    throwIfAborted();
+    throwIfAborted(signal);
 
     try {
       await access(absolutePath, constants.R_OK | constants.W_OK);
@@ -124,10 +119,10 @@ export async function applyReplaceFunction(
         cause: error,
       });
     }
-    throwIfAborted();
+    throwIfAborted(signal);
 
     const raw = await readFile(absolutePath, 'utf-8');
-    throwIfAborted();
+    throwIfAborted(signal);
     const { bom, text } = splitBom(raw);
     const eol = detectLineEnding(text);
     const source = normalizeToLf(text);
@@ -153,7 +148,7 @@ export async function applyReplaceFunction(
         details: undefined,
       };
     }
-    throwIfAborted();
+    throwIfAborted(signal);
 
     const checked = extractDeclaration(input.content, spec);
     if (!checked.ok) throw new Error(checked.error);
@@ -167,14 +162,14 @@ export async function applyReplaceFunction(
       decl.leadComment,
     );
     if (!result.ok) throw new Error(result.error);
-    throwIfAborted();
+    throwIfAborted(signal);
 
     await writeFile(
       absolutePath,
       bom + restoreLineEndings(result.source, eol),
       'utf-8',
     );
-    throwIfAborted();
+    throwIfAborted(signal);
 
     const { diff, firstChangedLine } = generateDiffString(
       source,
@@ -277,4 +272,10 @@ function resolveToCwd(filePath: string, cwd: string): string {
       ? filePath.replace(/^~/, homedir())
       : filePath;
   return resolve(cwd, expanded);
+}
+
+/** Check the abort flag between awaits instead of racing the mutation queue
+ * with a listener, so the queue stays locked until the current write settles. */
+function throwIfAborted(signal: AbortSignal | undefined): void {
+  if (signal?.aborted) throw new Error('Operation aborted');
 }

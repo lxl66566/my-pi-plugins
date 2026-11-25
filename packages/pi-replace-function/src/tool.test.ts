@@ -175,4 +175,18 @@ describe('replace_function tool', () => {
       'class A {\n  m(a: number) {\n    return a * 2\n  }\n}\n',
     );
   });
+
+  it('keeps relative indentation when the content is already indented', async () => {
+    const file = await withFile(
+      'class A {\n    m(a: number) {\n        return a\n    }\n}\n',
+    );
+    await execute({
+      content: '    m(a: number) {\n        return a * 2\n    }\n',
+      name: 'm',
+      path: file,
+    });
+    expect(await readFile(file, 'utf-8')).toBe(
+      'class A {\n    m(a: number) {\n        return a * 2\n    }\n}\n',
+    );
+  });
 });

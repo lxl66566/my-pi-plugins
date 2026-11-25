@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
+import { extractDeclaration } from './content.ts';
 import { commentLineFor, specForPath } from './langs.ts';
 import { locate } from './locate.ts';
 import { attachedCommentStart, replaceFunction } from './replace.ts';
-import { commonIndent, dedentLines, spliceSpan } from './text.ts';
+import { spliceSpan } from './text.ts';
 
 const ts = specForPath('a.ts')!;
 
@@ -20,25 +21,6 @@ function replaceIn(
 }
 
 describe('text helpers', () => {
-  it('computes the common indent', () => {
-    expect(commonIndent(['  a', '    b', ''])).toBe('  ');
-    expect(commonIndent(['a', '  b'])).toBe('');
-    expect(commonIndent([''])).toBe('');
-  });
-
-  it('dedents lines by their common indent', () => {
-    expect(dedentLines(['  function f() {', '    return 1', '  }'])).toEqual([
-      'function f() {',
-      '  return 1',
-      '}',
-    ]);
-    expect(dedentLines(['m() {', '  return 1', '}'])).toEqual([
-      'm() {',
-      '  return 1',
-      '}',
-    ]);
-  });
-
   it('splices single- and multi-line spans', () => {
     const src = 'aaa\nbbb\nccc';
     expect(
@@ -116,6 +98,42 @@ describe('replaceFunction', () => {
     if (!result.ok) throw new Error(result.error);
     expect(result.source).toBe(
       'class A {\n  m(a: number) {\n    return a * 2\n  }\n}\n',
+    );
+  });
+
+  it('preserves relative indentation of indented method content', () => {
+    const src = 'class A {\n  m(a: number) {\n    return a\n  }\n}\n';
+    const content = '  m(a: number) {\n    return a * 2\n  }\n';
+    const checked = extractDeclaration(content, ts);
+    if (!checked.ok) throw new Error(checked.error);
+    const result = replaceIn(
+      src,
+      'm',
+      checked.decl.text,
+      checked.decl.leadComment,
+    );
+    if (!result.ok) throw new Error(result.error);
+    expect(result.source).toBe(
+      'class A {\n  m(a: number) {\n    return a * 2\n  }\n}\n',
+    );
+  });
+
+  it('re-indents indented content that brings its own comments', () => {
+    const src =
+      'class A {\n  /** old doc */\n  m(a: number) {\n    return a\n  }\n}\n';
+    const content =
+      '  /** new doc */\n  m(a: number) {\n    return a * 2\n  }\n';
+    const checked = extractDeclaration(content, ts);
+    if (!checked.ok) throw new Error(checked.error);
+    const result = replaceIn(
+      src,
+      'm',
+      checked.decl.text,
+      checked.decl.leadComment,
+    );
+    if (!result.ok) throw new Error(result.error);
+    expect(result.source).toBe(
+      'class A {\n  /** new doc */\n  m(a: number) {\n    return a * 2\n  }\n}\n',
     );
   });
 
