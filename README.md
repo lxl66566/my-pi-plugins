@@ -1,11 +1,12 @@
 # my-pi-plugins
 
-My [pi](https://github.com/earendil-works/pi) extensions in one monorepo. Repo-level infrastructure (toolchain configs, CI, git hooks) is declared once at the root; each package publishes to npm separately.
+My [pi](https://github.com/earendil-works/pi) extensions in one monorepo.
 
-| Package                                             | npm                                                                      | Description                                                                                                       |
-| --------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| [pi-replace-function](packages/pi-replace-function) | [pi-replace-function](https://www.npmjs.com/package/pi-replace-function) | `replace_function` tool: locate a declaration on the syntax tree and swap it in place from a full new declaration |
-| [pi-reuse-model](packages/pi-reuse-model)           | [pi-reuse-model](https://www.npmjs.com/package/pi-reuse-model)           | Start every fresh session on the model and thinking level last used in this workspace                             |
+<!-- prettier-ignore -->
+| Package | Description |
+| --- | --- |
+| [pi-replace-function](https://www.npmjs.com/package/pi-replace-function) | `replace_function` tool: locate a declaration on the syntax tree and swap it in place from a full new declaration |
+| [pi-reuse-model](https://www.npmjs.com/package/pi-reuse-model) | Start every fresh session on the model and thinking level last used in this workspace |
 
 ## Install
 
